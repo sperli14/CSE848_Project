@@ -1,0 +1,11 @@
+num_simulations           =   100
+num_threads               =   1
+
+output_file               =   testparam.hsres
+
+deckListFilePath0         =       deck0.hsdeck
+deckListFilePath1         =       deck0.hsdeck
+
+aiParamFilePath0          =       ai.hsai
+aiParamFilePath1          =       ai.hsai
+
