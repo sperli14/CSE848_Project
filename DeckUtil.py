@@ -56,12 +56,18 @@ def createConfig(filename, deck0, deck1, numberOfRuns): # pass in deck names wit
 createConfig("testparam", "deck0", "deck0", 100)
 
 
-def getDeck(filename):
-    name = "./" + filename + ".cardlist"
+# input classname, returns neutral and class cards
+def getAllCards(classname):
+    name = "./res/cards/" + classname + ".hsdeck"
     with open(name, 'r') as file:
         temp = file.read()
         cardlist = temp.split(",\n")
-    return cardlist
+
+    neutral = "./res/cards/noclass.hsdeck"
+    with open(neutral, 'r') as file:
+        temp = file.read()
+        neutralcards = temp.split(",\n")
+    return neutralcards + cardlist
 
 
-print(getDeck("all"))
+print(getAllCards("mage"))
