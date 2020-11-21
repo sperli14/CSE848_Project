@@ -1,85 +1,119 @@
 import random
-from operator import itemgetter
+from operator import itemgetter, attrgetter
 from os import system
+from DeckUtil import pytohs
+from HSdeck import HSdeck
+from CardGenerator import CardGenerator
 
 #change properties file then run:
 #gradle runSim
-deck_id = 0
-
-def random_card():
-    pass
+cardGenerator = CardGenerator()
 
 def initialization(N):
     population = []
+    classname = "mage"
     for i in range(N):
         deck = []
         for j in range(30):#30 card decks
             found = False
             while not found:
-                card = random_card()
+                card = cardGenerator.generate_random_card(classname)
                 if deck.count(card) <= 1:
                     deck.append(card)
                     found = True
-        population.append(deck)
+        population.append(HSdeck(classname, deck))
     return population
 
 #take in one model and swap out one card for another
 def mutate(model):
-    pos = random.randint(0,len(model))
+    classname = model.get_class()
+    deck = model.get_deck()
+    pos = random.randint(0,len(deck))
     found = False
     while not found:
-        card = random_card()
-        if model.count(card) <= 1:
-            model[pos] = card
+        card = cardGenerator.generate_random_card(classname)
+        if deck.count(card) <= 1:
+            deck[pos] = card
             found = True
-    return model
+    model.set_deck(deck)
 
 #performs simple recombination from two models using crossover
 #not done
 #only two copies of a card per deck, 1 if legendary
 def recombination(model1, model2):
-    crossover_point = random.randint(1,len(model1))
-    child1 = model1[:crossover_point]# + model2[crossover_point:]
-    for i in range(crossover_point, len(model2)):
-        if child1.count(model2[i]) <= 1:
-            child1.append(model2[i])
-    child2 = model2[:crossover_point] + model1[crossover_point:]
-    return child1, child2
+    classname = model1.get_class()
+    deck1 = model1.get_deck()
+    deck2 = model2.get_deck()
+    crossover_point = random.randint(1,len(deck1))
+    child_deck1 = deck1[:crossover_point]
+    for i in range(crossover_point, len(deck2)):
+        if child_deck1.count(deck2[i]) <= 1:
+            child_deck1.append(deck2[i])
+    child_deck2 = deck2[:crossover_point] + deck1[crossover_point:]
     
-def fitness(model):
-    pass
+    child1 = HSdeck(classname, child_deck1)
+    child2 = HSdeck(classname, child_deck2)
+    
+    return child1, child2
+
+#measures fitness of an individual by having it play against 10 opponents
+#winrate is the fitness
+#NOT COMPLETE
+def fitness(model, population):
+    model.set_fitness(0)###################
+    return##############################
+    games = 10
+    adversaries = random.sample(range(len(population)), games)
+    wins = 0
+    for index in adversaries:
+        opponent = population[index]
+        #play a game between model and opponent
+        #if model wins, increase wins by one
+    fit = wins/games
+    model.set_fitness(fit)
+    return fit
+
+#record fitness for all population
+def fitness_all(population):
+    max_fitness = 0
+    for i, model in enumerate(population):
+        if i != len(population)-1:
+            fit = fitness(model, population[:i]+population[i+1:])
+        else:
+            fit = fitness(model, population[:i])
+        if fit > max_fitness:
+            max_fitness = fit
+    return max_fitness
+    
 
 #performs parent and survivor selection
 #also performs recombination by calling the previous function
 def selection(population):
     #evaluate population
-    models_fitness = []
-    for model in population:
-        models_fitness.append((model,fitness(model)))
-    #models_fitness.sort(key=itemgetter(1), reverse=True)
-    
+    fitness_all(population)
+
+    offspring = []
     #birth new models
     for i in range(len(population)):
         #five random members selected, best two get to breed
-        chosen = random.sample(models_fitness, 5)
-        chosen.sort(key=itemgetter(1), reverse=True)
+        chosen = random.sample(population, 5)
+        chosen.sort(key=attrgetter('fitness'), reverse=True)
         parents = chosen[:2]
         offspring1, offspring2 = recombination(parents[0][0], parents[1][0])
         #evaluate offspring
-        offspring1_fitness = fitness(offspring1)
-        offspring2_fitness = fitness(offspring2)
-        models_fitness.append((offspring1, offspring1_fitness))
-        models_fitness.append((offspring2, offspring2_fitness))
+        fitness(offspring1, population)
+        fitness(offspring2, population)
+        offspring.append(offspring1)
+        offspring.append(offspring2)
+    population = population + offspring
     
-    
-    models_fitness.sort(key=itemgetter(1), reverse=True)
+    population.sort(key=attrgetter('fitness'), reverse=True)
     
     #SUS with elitism
-    models_fitness = [models_fitness[i] for i in range(0, len(models_fitness), 3)]
-    population = [model_tup[0] for model_tup in models_fitness]
-    
+    population = [population[i] for i in range(0, len(population), 3)]    
     return population
 
+"""
 def build_deck_file(model):
     outfile = open(str(deck_id)+".hsdeck", 'w')
     deck_class = "None"
@@ -89,12 +123,12 @@ def build_deck_file(model):
         outfile.write(card)
     outfile.close()
     #deck_id+=1
-
+"""
 
 def hearthstone_GA():
-    pop_size = 500
+    pop_size = 100
     population = initialization(pop_size)
-    best_fitness = -1000000
+    best_fitness = 0
     best_model = None
     fitness_evals = 0
     generation = 0
@@ -102,10 +136,10 @@ def hearthstone_GA():
     #each iteration of this loop is a generation
     while generation < 1000:
         generation += 1
-        fitness_evals += 1500#each generation performs 1500 fitness evaluations
+        fitness_evals += 100#each generation performs 100 fitness evaluations
         population = selection(population)
         index = 0
-        while index < 500:
+        while index < pop_size:
             model = population[index]
             roll = random.random()
             #80% chance of mutation for each member of the population
