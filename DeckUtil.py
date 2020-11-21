@@ -54,3 +54,14 @@ def createConfig(filename, deck0, deck1, numberOfRuns): # pass in deck names wit
 
 
 createConfig("testparam", "deck0", "deck0", 100)
+
+
+def getDeck(filename):
+    name = "./" + filename + ".cardlist"
+    with open(name, 'r') as file:
+        temp = file.read()
+        cardlist = temp.split(",\n")
+    return cardlist
+
+
+print(getDeck("all"))
