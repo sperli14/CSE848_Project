@@ -1,7 +1,7 @@
 import random
 from operator import itemgetter, attrgetter
 from os import system
-from DeckUtil import pytohs
+from DeckUtil import pytohs, createConfig
 from HSdeck import HSdeck
 from CardGenerator import CardGenerator
 
@@ -65,8 +65,11 @@ def fitness(model, population):
     games = 10
     adversaries = random.sample(range(len(population)), games)
     wins = 0
+    pytohs("deck0", model.get_class(), model.get_deck())
     for index in adversaries:
         opponent = population[index]
+        pytohs("deck1", opponent.get_class(), opponent.get_deck())
+        createConfig("config", "deck0", "deck1", 1)
         #play a game between model and opponent
         #if model wins, increase wins by one
     fit = wins/games
