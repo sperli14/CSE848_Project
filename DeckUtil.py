@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import random
 import os
+import json
 
 
 def hstopy(filename): # method used to convert from a .hsdeck format to python list format
@@ -30,10 +31,10 @@ def pytohs(filename, hero, decklist): # method used to convert to a .hsdeck form
             if i != len(decklist)-1:
                 file.write(',\n')
 
-
-hero = "mage"
-deck = ['Test', 'Deck', 'MurlocRaider', 'MurlocRaider', 'BloodfenRaptor', 'BloodfenRaptor', 'FrostwolfGrunt', 'FrostwolfGrunt', 'RiverCrocolisk', 'RiverCrocolisk', 'IronfurGrizzly', 'IronfurGrizzly', 'MagmaRager', 'MagmaRager', 'SilverbackPatriarch', 'SilverbackPatriarch', 'ChillwindYeti', 'ChillwindYeti', 'OasisSnapjaw', 'OasisSnapjaw', 'SenjinShieldmasta', 'SenjinShieldmasta', 'BootyBayBodyguard', 'BootyBayBodyguard', 'FenCreeper', 'FenCreeper', 'BoulderfistOgre', 'BoulderfistOgre', 'WarGolem', 'WarGolem']
-pytohs("testdeck", hero, deck)
+#
+# hero = "mage"
+# deck = ['Test', 'Deck', 'MurlocRaider', 'MurlocRaider', 'BloodfenRaptor', 'BloodfenRaptor', 'FrostwolfGrunt', 'FrostwolfGrunt', 'RiverCrocolisk', 'RiverCrocolisk', 'IronfurGrizzly', 'IronfurGrizzly', 'MagmaRager', 'MagmaRager', 'SilverbackPatriarch', 'SilverbackPatriarch', 'ChillwindYeti', 'ChillwindYeti', 'OasisSnapjaw', 'OasisSnapjaw', 'SenjinShieldmasta', 'SenjinShieldmasta', 'BootyBayBodyguard', 'BootyBayBodyguard', 'FenCreeper', 'FenCreeper', 'BoulderfistOgre', 'BoulderfistOgre', 'WarGolem', 'WarGolem']
+# pytohs("testdeck", hero, deck)
 
 
 def createConfig(filename, deck0, deck1, numberOfRuns): # pass in deck names without the .hsdeck. This method assumes that the simulation uses one ai (ai.hsai)
@@ -74,17 +75,33 @@ def getAllCards(classname):
     return neutralcards + cardlist
 
 
-mage = random.sample(getAllCards("mage"), 30)
-print(mage)
-pytohs("mage", "None", mage)
+def getResults(filename):
+    name = "./HearthSim-master/experiments/" + filename + ".hsres"
+    result = []
+    with open(name, 'r') as file:
+        inp = file.read()
+        cardlist = inp.splitlines()
+        print(inp)
 
-warlord = random.sample(getAllCards("warlord"), 30)
-print(warlord)
-pytohs("warlord", "None", warlord)
+        for element in cardlist:
+            temp = str(element)
+            game = json.loads(temp)
+            result.append(game["winner"])
 
-createConfig("config", "mage", "warlord", 10)
-os.chdir("./HearthSim-master")
-os.system("gradlew runSim")
+    return {"P0": result.count(0)/len(result), "P1": result.count(1)/len(result)}
 
-# import subprocess
-# output = subprocess.check_output(os.getcwd() + "/HearthSim-master/gradlew runSim", shell=True)
+
+if __name__ == "__main__":
+    # mage = random.sample(getAllCards("mage"), 30)
+    # print(mage)
+    # pytohs("mage", "None", mage)
+    #
+    # warlord = random.sample(getAllCards("warlord"), 30)
+    # print(warlord)
+    # pytohs("warlord", "None", warlord)
+    #
+    # createConfig("config", "mage", "warlord", 10)
+    # os.chdir("./HearthSim-master")
+    # os.system("gradlew runSim")
+    print(getResults("config"))
+
