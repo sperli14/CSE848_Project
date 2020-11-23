@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
+import random
+import os
 
 
 def hstopy(filename): # method used to convert from a .hsdeck format to python list format
-    name = "./" + filename + ".hsdeck"
+    name = "./HearthSim-master/experiments/" + filename + ".hsdeck"
     with open(name, 'r') as file:
         hero = file.readline().rstrip(",\n")
         allcards = file.read()
@@ -20,7 +22,7 @@ def hstopy(filename): # method used to convert from a .hsdeck format to python l
 
 
 def pytohs(filename, hero, decklist): # method used to convert to a .hsdeck format
-    name = "./" + filename + ".hsdeck"
+    name = "./HearthSim-master/experiments/" + filename + ".hsdeck"
     with open(name, 'w') as file:
         file.write(hero + ',\n')
         for element in decklist:
@@ -33,7 +35,7 @@ pytohs("testdeck", hero, deck)
 
 
 def createConfig(filename, deck0, deck1, numberOfRuns): # pass in deck names without the .hsdeck. This method assumes that the simulation uses one ai (ai.hsai)
-    name = "./" + filename + ".hsparam"
+    name = "./HearthSim-master/experiments/" + filename + ".hsparam"
     with open(name, 'w') as file:
 
         # IMPORTANT: DO NOT CHANGE THE SPACING
@@ -70,4 +72,17 @@ def getAllCards(classname):
     return neutralcards + cardlist
 
 
-print(getAllCards("mage"))
+mage = random.sample(getAllCards("mage"), 30)
+print(mage)
+pytohs("mage", "None", mage)
+
+warlord = random.sample(getAllCards("warlord"), 30)
+print(warlord)
+pytohs("warlord", "None", warlord)
+
+createConfig("config", "mage", "warlord", 10)
+os.chdir("./HearthSim-master")
+os.system("gradlew runSim")
+
+# import subprocess
+# output = subprocess.check_output(os.getcwd() + "/HearthSim-master/gradlew runSim", shell=True)
