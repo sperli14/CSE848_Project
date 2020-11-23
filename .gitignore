@@ -1,0 +1,3 @@
+*.hsres
+.gradle
+**/experiments
