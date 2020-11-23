@@ -53,7 +53,7 @@ def createConfig(filename, deck0, deck1, numberOfRuns): # pass in deck names wit
         file.write("\n")
 
 
-createConfig("testparam", "deck0", "deck0", 100)
+#createConfig("testparam", "deck0", "deck0", 100)
 
 
 # input classname, returns neutral and class cards

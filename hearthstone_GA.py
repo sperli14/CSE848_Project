@@ -1,6 +1,6 @@
 import random
 from operator import itemgetter, attrgetter
-from os import system
+from os import system, chdir
 from DeckUtil import pytohs, createConfig
 from HSdeck import HSdeck
 from CardGenerator import CardGenerator
@@ -8,7 +8,7 @@ from CardGenerator import CardGenerator
 #change properties file then run:
 #gradle runSim
 cardGenerator = CardGenerator()
-
+chdir("HearthSim-master")
 def initialization(N):
     population = []
     classname = "mage"
@@ -60,18 +60,19 @@ def recombination(model1, model2):
 #winrate is the fitness
 #NOT COMPLETE
 def fitness(model, population):
-    model.set_fitness(0)###################
-    return##############################
-    games = 10
+    games = 5
     adversaries = random.sample(range(len(population)), games)
     wins = 0
-    pytohs("deck0", model.get_class(), model.get_deck())
+    pytohs("custom/deck0", model.get_class(), model.get_deck())
     for index in adversaries:
         opponent = population[index]
-        pytohs("deck1", opponent.get_class(), opponent.get_deck())
-        createConfig("config", "deck0", "deck1", 1)
-        #play a game between model and opponent
-        #if model wins, increase wins by one
+        pytohs("custom/deck1", opponent.get_class(), opponent.get_deck())
+        createConfig("custom/config", "deck0", "deck1", 1)
+        system("gradlew runSim")#run simulation
+        with open("/HearthSim-master/custom/config.hsres") as fp:
+            text = fp.readlines()
+            if text[text.index("winner:")+7] == "0":
+                wins += 1
     fit = wins/games
     model.set_fitness(fit)
     return fit
@@ -129,7 +130,7 @@ def build_deck_file(model):
 """
 
 def hearthstone_GA():
-    pop_size = 100
+    pop_size = 10
     population = initialization(pop_size)
     best_fitness = 0
     best_model = None
@@ -137,7 +138,7 @@ def hearthstone_GA():
     generation = 0
     fitnesses = []
     #each iteration of this loop is a generation
-    while generation < 1000:
+    while generation < 2:
         generation += 1
         fitness_evals += 100#each generation performs 100 fitness evaluations
         population = selection(population)
@@ -163,3 +164,5 @@ def hearthstone_GA():
     print(best_fitness)
     print("Generation:", generation)
     print("Fitness Evals:", fitness_evals)
+    
+hearthstone_GA()
