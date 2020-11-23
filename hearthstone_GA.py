@@ -69,7 +69,7 @@ def fitness(model, population):
         pytohs("custom/deck1", opponent.get_class(), opponent.get_deck())
         createConfig("custom/config", "deck0", "deck1", 1)
         system("gradlew runSim")#run simulation
-        with open("/HearthSim-master/custom/config.hsres") as fp:
+        with open("custom/config.hsres") as fp:
             text = fp.readlines()
             if text[text.index("winner:")+7] == "0":
                 wins += 1
