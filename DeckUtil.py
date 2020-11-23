@@ -23,8 +23,10 @@ def pytohs(filename, hero, decklist): # method used to convert to a .hsdeck form
     name = "./" + filename + ".hsdeck"
     with open(name, 'w') as file:
         file.write(hero + ',\n')
-        for element in decklist:
-            file.write(element + ',\n')
+        for i, element in enumerate(decklist):
+            file.write(element)
+            if i != len(decklist)-1:
+                file.write(',\n')
 
 
 hero = "mage"
