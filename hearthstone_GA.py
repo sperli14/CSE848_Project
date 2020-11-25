@@ -1,7 +1,7 @@
 import random
 from operator import itemgetter, attrgetter
 from os import system, chdir
-from DeckUtil import pytohs, createConfig
+from DeckUtil import pytohs, createConfig, getResults
 from HSdeck import HSdeck
 from CardGenerator import CardGenerator
 
@@ -28,7 +28,7 @@ def initialization(N):
 def mutate(model):
     classname = model.get_class()
     deck = model.get_deck()
-    pos = random.randint(0,len(deck))
+    pos = random.randint(0,len(deck)-1)
     found = False
     while not found:
         card = cardGenerator.generate_random_card(classname)
@@ -44,7 +44,7 @@ def recombination(model1, model2):
     classname = model1.get_class()
     deck1 = model1.get_deck()
     deck2 = model2.get_deck()
-    crossover_point = random.randint(1,len(deck1))
+    crossover_point = random.randint(1,len(deck1)-1)
     child_deck1 = deck1[:crossover_point]
     for i in range(crossover_point, len(deck2)):
         if child_deck1.count(deck2[i]) <= 1:
@@ -60,18 +60,23 @@ def recombination(model1, model2):
 #winrate is the fitness
 #NOT COMPLETE
 def fitness(model, population):
-    games = 5
+    games = 2
     adversaries = random.sample(range(len(population)), games)
     wins = 0
-    pytohs("custom/deck0", model.get_class(), model.get_deck())
+    #pytohs("deck0", model.get_class(), model.get_deck())
+    pytohs("deck0", "None", model.get_deck())
     for index in adversaries:
         opponent = population[index]
-        pytohs("custom/deck1", opponent.get_class(), opponent.get_deck())
-        createConfig("custom/config", "deck0", "deck1", 1)
+        #pytohs("deck1", opponent.get_class(), opponent.get_deck())
+        pytohs("deck1", "None", opponent.get_deck())
+        createConfig("config", "deck0", "deck1", 1)
         system("gradlew runSim")#run simulation
-        with open("custom/config.hsres") as fp:
-            text = fp.readlines()
-            if text[text.index("winner:")+7] == "0":
+        #if getResults("config")["P0"] == 1:
+        #    wins += 1
+        with open("experiments/config.hsres") as fp:
+            text = fp.read()
+            print("run")
+            if text[text.index('winner":')+8] == "0":
                 wins += 1
     fit = wins/games
     model.set_fitness(fit)
@@ -130,7 +135,7 @@ def build_deck_file(model):
 """
 
 def hearthstone_GA():
-    pop_size = 10
+    pop_size = 5
     population = initialization(pop_size)
     best_fitness = 0
     best_model = None
@@ -148,9 +153,10 @@ def hearthstone_GA():
             roll = random.random()
             #80% chance of mutation for each member of the population
             if roll < 0.80:
-                population[index] = mutate(model)
+                mutate(model)
             index += 1
         #evaluate and find best model
+        """
         models_fitness = []
         for model in population:
             models_fitness.append((model,fitness(model)))
@@ -158,7 +164,7 @@ def hearthstone_GA():
         fitnesses.append(models_fitness[0][1])
         if models_fitness[0][1] > best_fitness:
             best_fitness = models_fitness[0][1]
-            best_model = models_fitness[0][0]
+            best_model = models_fitness[0][0]"""
     #after termination condition, display best model, best fitness of said model, how many generations ran, and how many fitness evaluations
     print(best_model)
     print(best_fitness)

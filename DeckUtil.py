@@ -5,7 +5,7 @@ import json
 
 
 def hstopy(filename): # method used to convert from a .hsdeck format to python list format
-    name = "./HearthSim-master/experiments/" + filename + ".hsdeck"
+    name = "./experiments/" + filename + ".hsdeck"
     with open(name, 'r') as file:
         hero = file.readline().rstrip(",\n")
         allcards = file.read()
@@ -23,7 +23,7 @@ def hstopy(filename): # method used to convert from a .hsdeck format to python l
 
 
 def pytohs(filename, hero, decklist): # method used to convert to a .hsdeck format
-    name = "./HearthSim-master/experiments/" + filename + ".hsdeck"
+    name = "./experiments/" + filename + ".hsdeck"
     with open(name, 'w') as file:
         file.write(hero + ',\n')
         for i, element in enumerate(decklist):
@@ -38,7 +38,7 @@ def pytohs(filename, hero, decklist): # method used to convert to a .hsdeck form
 
 
 def createConfig(filename, deck0, deck1, numberOfRuns): # pass in deck names without the .hsdeck. This method assumes that the simulation uses one ai (ai.hsai)
-    name = "./HearthSim-master/experiments/" + filename + ".hsparam"
+    name = "./experiments/" + filename + ".hsparam"
     with open(name, 'w') as file:
 
         # IMPORTANT: DO NOT CHANGE THE SPACING
@@ -76,7 +76,7 @@ def getAllCards(classname):
 
 
 def getResults(filename):
-    name = "./HearthSim-master/experiments/" + filename + ".hsres"
+    name = "./experiments/" + filename + ".hsres"
     result = []
     with open(name, 'r') as file:
         inp = file.read()
