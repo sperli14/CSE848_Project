@@ -36,6 +36,7 @@ def mutate(model):
             deck[pos] = card
             found = True
     model.set_deck(deck)
+    model.validate()
 
 #performs simple recombination from two models using crossover
 #not done
@@ -44,7 +45,7 @@ def recombination(model1, model2):
     classname = model1.get_class()
     deck1 = model1.get_deck()
     deck2 = model2.get_deck()
-    crossover_point = random.randint(1,len(deck1)-1)
+    crossover_point = random.randint(0,len(deck1)-1)
     child_deck1 = deck1[:crossover_point]
     for i in range(crossover_point, len(deck2)):
         if child_deck1.count(deck2[i]) <= 1:
@@ -52,7 +53,9 @@ def recombination(model1, model2):
     child_deck2 = deck2[:crossover_point] + deck1[crossover_point:]
     
     child1 = HSdeck(classname, child_deck1)
+    child1.validate()
     child2 = HSdeck(classname, child_deck2)
+    child2.validate()
     
     return child1, child2
 
@@ -64,12 +67,12 @@ def fitness(model, population):
     adversaries = random.sample(range(len(population)), games)
     wins = 0
     #pytohs("deck0", model.get_class(), model.get_deck())
-    pytohs("deck0", "None", model.get_deck())
+    pytohs("deck0", "Mage", model.get_deck())
     for index in adversaries:
         opponent = population[index]
         #pytohs("deck1", opponent.get_class(), opponent.get_deck())
-        pytohs("deck1", "None", opponent.get_deck())
-        createConfig("config", "deck0", "deck1", 1)
+        pytohs("deck1", "Mage", opponent.get_deck())
+        
         system("gradlew runSim")#run simulation
         #if getResults("config")["P0"] == 1:
         #    wins += 1
@@ -108,7 +111,7 @@ def selection(population):
         chosen = random.sample(population, 5)
         chosen.sort(key=attrgetter('fitness'), reverse=True)
         parents = chosen[:2]
-        offspring1, offspring2 = recombination(parents[0][0], parents[1][0])
+        offspring1, offspring2 = recombination(parents[0], parents[1])
         #evaluate offspring
         fitness(offspring1, population)
         fitness(offspring2, population)
@@ -135,6 +138,7 @@ def build_deck_file(model):
 """
 
 def hearthstone_GA():
+    createConfig("config", "deck0", "deck1", 1)
     pop_size = 5
     population = initialization(pop_size)
     best_fitness = 0
