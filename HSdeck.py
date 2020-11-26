@@ -11,6 +11,8 @@ class HSdeck():
         self._deck = deck
     def set_fitness(self, fitness):
         self.fitness = fitness
+    def get_fitness(self):
+        return self.fitness
     def validate(self):
         if len(self._deck) > 30:
             self._deck = self._deck[:30]

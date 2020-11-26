@@ -61,7 +61,6 @@ def recombination(model1, model2):
 
 #measures fitness of an individual by having it play against 10 opponents
 #winrate is the fitness
-#NOT COMPLETE
 def fitness(model, population):
     games = 2
     adversaries = random.sample(range(len(population)), games)
@@ -137,6 +136,22 @@ def build_deck_file(model):
     #deck_id+=1
 """
 
+def save(population, generation):
+    with open("savefile.txt", 'w') as file:
+        for model in population:
+            file.write(model.get_class() + " Fitness:" + str(model.get_fitness()) + ',\n')
+            for i, element in enumerate(model.get_deck()):
+                file.write(element)
+                if i != 29:
+                    file.write(',\n')
+            file.write("\n\n")
+        file.write("Generation:"+str(generation))
+
+def load():
+    pass
+        
+
+
 def hearthstone_GA():
     createConfig("config", "deck0", "deck1", 1)
     pop_size = 5
@@ -148,6 +163,7 @@ def hearthstone_GA():
     fitnesses = []
     #each iteration of this loop is a generation
     while generation < 2:
+        save(population, generation)
         generation += 1
         fitness_evals += 100#each generation performs 100 fitness evaluations
         population = selection(population)
