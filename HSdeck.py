@@ -16,3 +16,12 @@ class HSdeck():
     def validate(self):
         if len(self._deck) > 30:
             self._deck = self._deck[:30]
+    def __str__(self):
+        result = self._class + "\n"
+        for card in self._deck:
+            result += card
+            result += "\n"
+        result += "Fitness:" + str(self.fitness)
+        return result
+    def __repr__(self):
+        return self.__str__()

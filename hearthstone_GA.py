@@ -82,7 +82,7 @@ def recombination(model1, model2):
 #measures fitness of an individual by having it play against 10 opponents
 #winrate is the fitness
 def fitness(model, population):
-    games = 2
+    games = 5
     adversaries = random.sample(range(len(population)), games)
     wins = 0
     #pytohs("deck0", model.get_class(), model.get_deck())
@@ -128,41 +128,47 @@ def removeDeck(iterable, item):
 #plays the deck against x number of random decks in population
 def getFitness(deck, population):
     numOfGames = 5
+    wins = 0
     tempPop = copy.deepcopy(population)
-    all = []
+    all_decks = []
     for subPop in tempPop:
         for element in subPop:
-            all.append(element)
+            all_decks.append(element)
     # print(deck)
     # print(all)
     # all.remove(deck)
-    removeDeck(all, deck)
+    removeDeck(all_decks, deck)
 
     opponents = random.sample(range(len(population)), numOfGames) # list of opponent by index
-    results = []
+    #results = []
 
     pytohs("protagonist", deck.get_class(), deck.get_deck())
     for game in opponents:
-        opponent = all[game]
+        opponent = all_decks[game]
         pytohs("antagonist", opponent.get_class(), opponent.get_deck())
 
-        # system("gradlew runSim")
+        system("gradlew runSim")
 
-        si = subprocess.STARTUPINFO()
-        si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        ##si = subprocess.STARTUPINFO()
+        ##si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         # si.wShowWindow = subprocess.SW_HIDE # default
-        subprocess.call('taskkill /F /IM exename.exe', startupinfo=si)
+        ##subprocess.call('taskkill /F /IM exename.exe', startupinfo=si)
 
         # results.append(getResults("experiments")["P0"])
-        wins = 0
-        with open("experiments/experiments.hsres") as fp:
+        #wins = 0
+        fp =  open("experiments/experiments.hsres")
+        text = fp.read()
+        # print("run")
+        while text.find('winner":') == -1:
+            system("gradlew runSim")
+            fp = open("experiments/experiments.hsres")
             text = fp.read()
-            # print("run")
-            if text[text.index('winner":')+8] == "0":
-                wins += 1
-        results.append(wins/5) #number depends on config file
+        if text[text.find('winner":')+8] == "0":
+            wins += 1
+        fp.close()
+        #results.append(wins/5) #number depends on config file
 
-    return mean(results)
+    return wins/numOfGames#mean(results)
 
 
 def calculateFitness(population):
@@ -273,7 +279,7 @@ def load():
         
 
 def hearthstone_GA():
-    createConfig("experiments", "protagonist", "antagonist", 5)
+    createConfig("experiments", "protagonist", "antagonist", 1)
     pop_size = 5
 
     # warlordPop = init(pop_size, "warlord")
@@ -319,7 +325,7 @@ def hearthstone_GA():
     # warriorPop = init(pop_size, "warrior")
 
     calculateFitness(population) #give each member of the population a fitness
-
+    print(str(population[0][0]))
     # population = initialization(pop_size)
     # best_fitness = 0
     # best_model = None
@@ -328,7 +334,7 @@ def hearthstone_GA():
     generation = 0
     fitnesses = []
     #each iteration of this loop is a generation
-    while generation < 2:
+    while generation < 50:
         # save(population, generation)
         generation += 1
         # fitness_evals += 100#each generation performs 100 fitness evaluations
@@ -368,6 +374,7 @@ def hearthstone_GA():
     for subPopulation in population:
         subPopulation.sort(key=attrgetter('fitness'), reverse=True)
         bestIndividual = subPopulation[0]
+        print(str(bestIndividual))
         pytohs(bestIndividual.get_class(), bestIndividual.get_class(), bestIndividual.get_deck()) #outputs the best performing individual to heroclass.hsdeck to analyse
         print(str(bestIndividual.get_class()) + "'s best individual has a fitness of: " + str(bestIndividual.get_fitness()))
 
