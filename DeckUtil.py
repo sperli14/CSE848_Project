@@ -91,10 +91,11 @@ def getResults(filename):
 
 
 if __name__ == "__main__":
-    x = getAllCards("mage")
-    x.sort()
-    for item in x:
-        print(item)
+    # x = getAllCards("mage")
+    # x.sort()
+    # for item in x:
+    #     print(item)
+
     # mage = random.sample(getAllCards("mage"), 30)
     # print(mage)
     # pytohs("mage", "None", mage)
@@ -106,5 +107,5 @@ if __name__ == "__main__":
     # createConfig("config", "mage", "warlord", 10)
     os.chdir("./HearthSim-master")
     # os.system("gradlew runSim")
-    print(getResults("config"))
+    print(getResults("experiments"))
 

@@ -6,6 +6,7 @@ from HSdeck import HSdeck
 from CardGenerator import CardGenerator
 import copy
 from statistics import mean
+import subprocess
 
 #change properties file then run:
 #gradle runSim
@@ -145,9 +146,21 @@ def getFitness(deck, population):
         opponent = all[game]
         pytohs("antagonist", opponent.get_class(), opponent.get_deck())
 
-        system("gradlew runSim")
+        # system("gradlew runSim")
 
-        results.append(getResults("experiments")["P0"])
+        si = subprocess.STARTUPINFO()
+        si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        # si.wShowWindow = subprocess.SW_HIDE # default
+        subprocess.call('taskkill /F /IM exename.exe', startupinfo=si)
+
+        # results.append(getResults("experiments")["P0"])
+        wins = 0
+        with open("experiments/experiments.hsres") as fp:
+            text = fp.read()
+            # print("run")
+            if text[text.index('winner":')+8] == "0":
+                wins += 1
+        results.append(wins/5) #number depends on config file
 
     return mean(results)
 
@@ -164,7 +177,7 @@ def tournamentSelection(inp, tournamentSize):  #returns 2 individuals via tourna
     round1 = random.sample(individuals, tournamentSize)
 
     result1 = round1[0]
-    for i in range(round1):
+    for i in range(len(round1)):
         if round1[i].get_fitness() > result1.get_fitness():
             result1 = round1[i]  #return the greatest individual from round1 sample
 
@@ -173,7 +186,7 @@ def tournamentSelection(inp, tournamentSize):  #returns 2 individuals via tourna
     round2 = random.sample(individuals, tournamentSize)
 
     result2 = round2[0]
-    for i in range(round2):
+    for i in range(len(round2)):
         if round2[i].get_fitness() > result2.get_fitness():
             result2 = round2[i]  # return the greatest individual from round1 sample
 
@@ -184,7 +197,7 @@ def crossoverPopulation(population):
     numOfRecombinations = 3  # number of offsprings per class
     populationSize = len(population[0])
     for subPopulation in population:  # append new children to subpopulations
-        for i in numOfRecombinations:
+        for i in range(numOfRecombinations):
             ind1, ind2 = tournamentSelection(subPopulation, 3)  #tournament size of 3, hardcoded (can be dynamically allocated later)
             child1, child2 = recombination(ind1, ind2)
             subPopulation.append(child1)
@@ -198,7 +211,8 @@ def crossoverPopulation(population):
         # cull the population back down to original population size
         cullPop = random.sample(subPopulation[1:], len(subPopulation) - populationSize)
         for i in range(len(cullPop)):
-            subPopulation.remove(i)
+            subPopulation = removeDeck(subPopulation, cullPop[i])
+            # subPopulation.remove(i)
 
     return population
 
@@ -355,7 +369,7 @@ def hearthstone_GA():
         subPopulation.sort(key=attrgetter('fitness'), reverse=True)
         bestIndividual = subPopulation[0]
         pytohs(bestIndividual.get_class(), bestIndividual.get_class(), bestIndividual.get_deck()) #outputs the best performing individual to heroclass.hsdeck to analyse
-        print(bestIndividual.get_class() + "'s best individual has a fitness of: " + bestIndividual.get_fitness())
+        print(str(bestIndividual.get_class()) + "'s best individual has a fitness of: " + str(bestIndividual.get_fitness()))
 
     print("Generation:", generation)
 
