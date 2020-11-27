@@ -4,11 +4,30 @@ from os import system, chdir
 from DeckUtil import pytohs, createConfig, getResults
 from HSdeck import HSdeck
 from CardGenerator import CardGenerator
+import copy
+from statistics import mean
 
 #change properties file then run:
 #gradle runSim
 cardGenerator = CardGenerator()
 chdir("HearthSim-master")
+
+
+def init(count, classname):
+    population = []
+    for i in range(count):
+        tempdeck = []
+        for j in range(30):
+            found = False
+            while not found:
+                card = cardGenerator.generate_random_card(classname)
+                if tempdeck.count(card) <= 1:
+                    tempdeck.append(card)
+                    found = True
+        population.append(HSdeck(classname, tempdeck))
+    return population
+
+
 def initialization(N):
     population = []
     classname = "mage"
@@ -28,7 +47,7 @@ def initialization(N):
 def mutate(model):
     classname = model.get_class()
     deck = model.get_deck()
-    pos = random.randint(0,len(deck)-1)
+    pos = random.randint(0, len(deck)-1)
     found = False
     while not found:
         card = cardGenerator.generate_random_card(classname)
@@ -95,7 +114,93 @@ def fitness_all(population):
         if fit > max_fitness:
             max_fitness = fit
     return max_fitness
-    
+
+
+def removeDeck(iterable, item):
+    for i, o in enumerate(iterable):
+        if o.get_deck() == item.get_deck():
+            del iterable[i]
+            break
+    return iterable
+
+
+#plays the deck against x number of random decks in population
+def getFitness(deck, population):
+    numOfGames = 5
+    tempPop = copy.deepcopy(population)
+    all = []
+    for subPop in tempPop:
+        for element in subPop:
+            all.append(element)
+    # print(deck)
+    # print(all)
+    # all.remove(deck)
+    removeDeck(all, deck)
+
+    opponents = random.sample(range(len(population)), numOfGames) # list of opponent by index
+    results = []
+
+    pytohs("protagonist", deck.get_class(), deck.get_deck())
+    for game in opponents:
+        opponent = all[game]
+        pytohs("antagonist", opponent.get_class(), opponent.get_deck())
+
+        system("gradlew runSim")
+
+        results.append(getResults("experiments")["P0"])
+
+    return mean(results)
+
+
+def calculateFitness(population):
+    for subPopulation in population:
+        for deck in subPopulation:
+            deck.set_fitness(getFitness(deck, population))
+
+
+def tournamentSelection(inp, tournamentSize):  #returns 2 individuals via tournament selection (cannot be same)
+    individuals = copy.deepcopy(inp)
+
+    round1 = random.sample(individuals, tournamentSize)
+
+    result1 = round1[0]
+    for i in range(round1):
+        if round1[i].get_fitness() > result1.get_fitness():
+            result1 = round1[i]  #return the greatest individual from round1 sample
+
+    individuals.remove(result1)
+
+    round2 = random.sample(individuals, tournamentSize)
+
+    result2 = round2[0]
+    for i in range(round2):
+        if round2[i].get_fitness() > result2.get_fitness():
+            result2 = round2[i]  # return the greatest individual from round1 sample
+
+    return result1, result2
+
+
+def crossoverPopulation(population):
+    numOfRecombinations = 3  # number of offsprings per class
+    populationSize = len(population[0])
+    for subPopulation in population:  # append new children to subpopulations
+        for i in numOfRecombinations:
+            ind1, ind2 = tournamentSelection(subPopulation, 3)  #tournament size of 3, hardcoded (can be dynamically allocated later)
+            child1, child2 = recombination(ind1, ind2)
+            subPopulation.append(child1)
+            subPopulation.append(child2)
+
+    calculateFitness(population)  # get new fitness for the new members of the population
+
+    for subPopulation in population:
+        subPopulation.sort(key=attrgetter("fitness"), reverse=True)  #
+
+        # cull the population back down to original population size
+        cullPop = random.sample(subPopulation[1:], len(subPopulation) - populationSize)
+        for i in range(len(cullPop)):
+            subPopulation.remove(i)
+
+    return population
 
 #performs parent and survivor selection
 #also performs recombination by calling the previous function
@@ -136,6 +241,7 @@ def build_deck_file(model):
     #deck_id+=1
 """
 
+
 def save(population, generation):
     with open("savefile.txt", 'w') as file:
         for model in population:
@@ -147,34 +253,90 @@ def save(population, generation):
             file.write("\n\n")
         file.write("Generation:"+str(generation))
 
+
 def load():
     pass
         
 
-
 def hearthstone_GA():
-    createConfig("config", "deck0", "deck1", 1)
+    createConfig("experiments", "protagonist", "antagonist", 5)
     pop_size = 5
-    population = initialization(pop_size)
-    best_fitness = 0
-    best_model = None
-    fitness_evals = 0
+
+    # warlordPop = init(pop_size, "warlord")
+    # magePop = init(pop_size, "mage")
+    # druidPop = init(pop_size, "druid")
+    # hunterPop = init(pop_size, "hunter")
+    # paladinPop = init(pop_size, "paladin")
+    # priestPop = init(pop_size, "priest")
+    # roguePop = init(pop_size, "rogue")
+    # shamanPop = init(pop_size, "shaman")
+    # warriorPop = init(pop_size, "warrior")
+    #
+    # population = {
+    #     "warlord": warlordPop,
+    #     "druid": druidPop,
+    #     "mage": magePop,
+    #     "hunter": hunterPop,
+    #     "paladin": paladinPop,
+    #     "priest": priestPop,
+    #     "rogue": roguePop,
+    #     "shaman": shamanPop,
+    #     "warrior": warriorPop
+    # }
+    population = []
+    population.append(init(pop_size, "Warlock"))
+    population.append(init(pop_size, "Mage"))
+    population.append(init(pop_size, "Druid"))
+    population.append(init(pop_size, "Hunter"))
+    population.append(init(pop_size, "Paladin"))
+    population.append(init(pop_size, "Priest"))
+    population.append(init(pop_size, "Rogue"))
+    population.append(init(pop_size, "Shaman"))
+    population.append(init(pop_size, "Warrior"))
+
+    # warlordPop = init(pop_size, "warlord")
+    # magePop = init(pop_size, "mage")
+    # druidPop = init(pop_size, "druid")
+    # hunterPop = init(pop_size, "hunter")
+    # paladinPop = init(pop_size, "paladin")
+    # priestPop = init(pop_size, "priest")
+    # roguePop = init(pop_size, "rogue")
+    # shamanPop = init(pop_size, "shaman")
+    # warriorPop = init(pop_size, "warrior")
+
+    calculateFitness(population) #give each member of the population a fitness
+
+    # population = initialization(pop_size)
+    # best_fitness = 0
+    # best_model = None
+    # fitness_evals = 0
+
     generation = 0
     fitnesses = []
     #each iteration of this loop is a generation
     while generation < 2:
-        save(population, generation)
+        # save(population, generation)
         generation += 1
-        fitness_evals += 100#each generation performs 100 fitness evaluations
-        population = selection(population)
-        index = 0
-        while index < pop_size:
-            model = population[index]
-            roll = random.random()
-            #80% chance of mutation for each member of the population
-            if roll < 0.80:
-                mutate(model)
-            index += 1
+        # fitness_evals += 100#each generation performs 100 fitness evaluations
+
+        #cross over population
+        population = crossoverPopulation(population)
+
+        #mutate population
+        for subPopulation in population:
+            for element in subPopulation:
+                if random.random() < 0.8:
+                    mutate(element)
+
+        #
+        # index = 0
+        # while index < pop_size:
+        #     model = population[index]
+        #     roll = random.random()
+        #     #80% chance of mutation for each member of the population
+        #     if roll < 0.80:
+        #         mutate(model)
+        #     index += 1
         #evaluate and find best model
         """
         models_fitness = []
@@ -186,9 +348,16 @@ def hearthstone_GA():
             best_fitness = models_fitness[0][1]
             best_model = models_fitness[0][0]"""
     #after termination condition, display best model, best fitness of said model, how many generations ran, and how many fitness evaluations
-    print(best_model)
-    print(best_fitness)
+    # print(best_model)
+    # print(best_fitness)
+
+    for subPopulation in population:
+        subPopulation.sort(key=attrgetter('fitness'), reverse=True)
+        bestIndividual = subPopulation[0]
+        pytohs(bestIndividual.get_class(), bestIndividual.get_class(), bestIndividual.get_deck()) #outputs the best performing individual to heroclass.hsdeck to analyse
+        print(bestIndividual.get_class() + "'s best individual has a fitness of: " + bestIndividual.get_fitness())
+
     print("Generation:", generation)
-    print("Fitness Evals:", fitness_evals)
-    
+
+
 hearthstone_GA()

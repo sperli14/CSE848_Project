@@ -81,7 +81,6 @@ def getResults(filename):
     with open(name, 'r') as file:
         inp = file.read()
         cardlist = inp.splitlines()
-        print(inp)
 
         for element in cardlist:
             temp = str(element)
