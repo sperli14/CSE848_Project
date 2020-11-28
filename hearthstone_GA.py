@@ -140,7 +140,7 @@ def getFitness(deck, population):
     removeDeck(all_decks, deck)
 
     opponents = random.sample(range(len(population)), numOfGames) # list of opponent by index
-    #results = []
+    results = []
 
     pytohs("protagonist", deck.get_class(), deck.get_deck())
     for game in opponents:
@@ -149,14 +149,14 @@ def getFitness(deck, population):
 
         system("gradlew runSim")
 
-        ##si = subprocess.STARTUPINFO()
-        ##si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        # si = subprocess.STARTUPINFO()
+        # si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         # si.wShowWindow = subprocess.SW_HIDE # default
-        ##subprocess.call('taskkill /F /IM exename.exe', startupinfo=si)
+        # subprocess.call("gradlew runSim", startupinfo=si)
 
         # results.append(getResults("experiments")["P0"])
         #wins = 0
-        fp =  open("experiments/experiments.hsres")
+        fp = open("experiments/experiments.hsres")
         text = fp.read()
         # print("run")
         while text.find('winner":') == -1:
@@ -166,9 +166,9 @@ def getFitness(deck, population):
         if text[text.find('winner":')+8] == "0":
             wins += 1
         fp.close()
-        #results.append(wins/5) #number depends on config file
+        results.append(wins/5) #number depends on config file
 
-    return wins/numOfGames#mean(results)
+    return mean(results)
 
 
 def calculateFitness(population):
@@ -334,7 +334,8 @@ def hearthstone_GA():
     generation = 0
     fitnesses = []
     #each iteration of this loop is a generation
-    while generation < 50:
+    while generation < 10:
+        print(generation)
         # save(population, generation)
         generation += 1
         # fitness_evals += 100#each generation performs 100 fitness evaluations
@@ -374,6 +375,9 @@ def hearthstone_GA():
     for subPopulation in population:
         subPopulation.sort(key=attrgetter('fitness'), reverse=True)
         bestIndividual = subPopulation[0]
+
+        for element in subPopulation:
+            print(str(element.get_deck()) + str(element.get_fitness()))
         print(str(bestIndividual))
         pytohs(bestIndividual.get_class(), bestIndividual.get_class(), bestIndividual.get_deck()) #outputs the best performing individual to heroclass.hsdeck to analyse
         print(str(bestIndividual.get_class()) + "'s best individual has a fitness of: " + str(bestIndividual.get_fitness()))

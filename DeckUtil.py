@@ -91,7 +91,8 @@ def getResults(filename):
 
 
 if __name__ == "__main__":
-    # x = getAllCards("mage")
+    x = getAllCards("Priest")
+    print(x)
     # x.sort()
     # for item in x:
     #     print(item)
@@ -105,7 +106,7 @@ if __name__ == "__main__":
     # pytohs("warlord", "None", warlord)
     #
     # createConfig("config", "mage", "warlord", 10)
-    os.chdir("./HearthSim-master")
-    # os.system("gradlew runSim")
-    print(getResults("experiments"))
+    # os.chdir("./HearthSim-master")
+    # # os.system("gradlew runSim")
+    # print(getResults("experiments"))
 
