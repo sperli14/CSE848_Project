@@ -67,11 +67,15 @@ def getAllCards(classname):
     with open(name, 'r') as file:
         temp = file.read()
         cardlist = temp.split(",\n")
+        for card in cardlist:
+            card = card.strip()
 
     neutral = "./res/cards/noclass.hsdeck"
     with open(neutral, 'r') as file:
         temp = file.read()
         neutralcards = temp.split(",\n")
+        for card in neutralcards:
+            card = card.strip()
     return neutralcards + cardlist
 
 
