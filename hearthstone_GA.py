@@ -147,8 +147,9 @@ def getFitness(deck, population):
         opponent = all_decks[game]
         pytohs("antagonist", opponent.get_class(), opponent.get_deck())
 
-        system("gradlew runSim --configure-on-demand --no-rebuild --parallel")
+        # system("gradlew runSim --configure-on-demand --no-rebuild --parallel")`
 
+        system("gradlew runSim --configure-on-demand --no-rebuild --offline")
         # si = subprocess.STARTUPINFO()
         # si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         # si.wShowWindow = subprocess.SW_HIDE # default
@@ -160,7 +161,7 @@ def getFitness(deck, population):
         text = fp.read()
         # print("run")
         while text.find('winner":') == -1:
-            system("gradlew runSim --configure-on-demand --no-rebuild --parallel")
+            system("gradlew runSim --configure-on-demand --no-rebuild --offline")
             fp = open("experiments/experiments.hsres")
             text = fp.read()
         if text[text.find('winner":')+8] == "0":
