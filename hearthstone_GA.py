@@ -147,12 +147,12 @@ def getFitness(deck, population):
         opponent = all_decks[game]
         pytohs("antagonist", opponent.get_class(), opponent.get_deck())
 
-        system("gradlew runSim")
+        # system("gradlew runSim")
 
-        # si = subprocess.STARTUPINFO()
-        # si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        # si.wShowWindow = subprocess.SW_HIDE # default
-        # subprocess.call("gradlew runSim", startupinfo=si)
+        si = subprocess.STARTUPINFO()
+        si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        si.wShowWindow = subprocess.SW_HIDE # default
+        subprocess.call("gradlew runSim", cwd="./HearthSim-master", startupinfo=si)
 
         # results.append(getResults("experiments")["P0"])
         #wins = 0
