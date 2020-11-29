@@ -86,20 +86,26 @@ def fitness(model, population):
     adversaries = random.sample(range(len(population)), games)
     wins = 0
     #pytohs("deck0", model.get_class(), model.get_deck())
-    pytohs("deck0", "Mage", model.get_deck())
+    pytohs("protagonist", model.get_class(), model.get_deck())
     for index in adversaries:
         opponent = population[index]
         #pytohs("deck1", opponent.get_class(), opponent.get_deck())
-        pytohs("deck1", "Mage", opponent.get_deck())
+        pytohs("antagonist", opponent.get_class(), opponent.get_deck())
         
         system("gradlew runSim")#run simulation
         #if getResults("config")["P0"] == 1:
         #    wins += 1
-        with open("experiments/config.hsres") as fp:
+        fp = open("experiments/experiments.hsres")
+        text = fp.read()
+        # print("run")
+        while text.find('winner":') == -1:
+            system("gradlew runSim --configure-on-demand --no-rebuild --offline")
+            fp = open("experiments/experiments.hsres")
             text = fp.read()
-            print("run")
-            if text[text.index('winner":')+8] == "0":
-                wins += 1
+        if text[text.find('winner":')+8] == "0":
+            wins += 1
+        fp.close()
+
     fit = wins/games
     model.set_fitness(fit)
     return fit
@@ -386,4 +392,107 @@ def hearthstone_GA():
     print("Generation:", generation)
 
 
-hearthstone_GA()
+#hearthstone_GA()
+    
+    
+    
+def hearthstone_GA_single_class():
+    createConfig("experiments", "protagonist", "antagonist", 1)
+    pop_size = 6
+
+    population = init(pop_size, "Mage")
+    print(population[0])
+    fitness_all(population) #give each member of the population a fitness
+    
+    # population = initialization(pop_size)
+    # best_fitness = 0
+    # best_model = None
+    # fitness_evals = 0
+
+    generation = 0
+    #fitnesses = []
+    #each iteration of this loop is a generation
+    while generation < 10:
+        print(generation)
+        # save(population, generation)
+        generation += 1
+        population = selection(population)
+
+        #mutate population
+        for element in population:
+            if random.random() < 0.8:
+                mutate(element)
+    population.sort(key=attrgetter('fitness'), reverse=True)
+    print(population[0])
+     
+
+    
+
+    print("Generation:", generation)
+#hearthstone_GA_single_class()
+    
+def hearthstone_tester1():
+    createConfig("experiments", "best_deck", "random", 1)
+    opponents = 50
+    population = init(opponents, "Mage")
+    print(population[0])
+    wins = 0
+    for opponent in population:
+        pytohs("random", opponent.get_class(), opponent.get_deck())
+        system("gradlew runSim")#run simulation
+        #if getResults("config")["P0"] == 1:
+        #    wins += 1
+        fp = open("experiments/experiments.hsres")
+        text = fp.read()
+        # print("run")
+        while text.find('winner":') == -1:
+            system("gradlew runSim --configure-on-demand --no-rebuild --offline")
+            fp = open("experiments/experiments.hsres")
+            text = fp.read()
+        if text[text.find('winner":')+8] == "0":
+            wins += 1
+    fp.close()
+
+    fit = wins/opponents
+    print(fit)
+def hearthstone_tester2():
+    createConfig("experiments", "best_deck", "random", 1)
+    
+#    population.append(init(pop_size, "Warlock"))
+#    population.append(init(pop_size, "Mage"))
+#    population.append(init(pop_size, "Druid"))
+#    population.append(init(pop_size, "Hunter"))
+#    population.append(init(pop_size, "Paladin"))
+#    population.append(init(pop_size, "Priest"))
+#    population.append(init(pop_size, "Rogue"))
+#    population.append(init(pop_size, "Shaman"))
+#    population.append(init(pop_size, "Warrior"))
+    
+    opponents = 40
+    types = ["Warlock", "Druid", "Hunter", "Paladin", "Priest", "Rogue", "Shaman", "Warrior"] #8 types
+    population = []
+    for my_type in types:
+        sub_pop = init(5, my_type)
+        for model in sub_pop:
+            population.append(model)
+    print(population[0])
+    wins = 0
+    for opponent in population:
+        pytohs("random", opponent.get_class(), opponent.get_deck())
+        system("gradlew runSim")#run simulation
+        #if getResults("config")["P0"] == 1:
+        #    wins += 1
+        fp = open("experiments/experiments.hsres")
+        text = fp.read()
+        # print("run")
+        while text.find('winner":') == -1:
+            system("gradlew runSim --configure-on-demand --no-rebuild --offline")
+            fp = open("experiments/experiments.hsres")
+            text = fp.read()
+        if text[text.find('winner":')+8] == "0":
+            wins += 1
+    fp.close()
+
+    fit = wins/opponents
+    print(fit)
+hearthstone_tester2()
