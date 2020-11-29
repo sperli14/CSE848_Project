@@ -171,9 +171,8 @@ def getFitness(deck, population):
 
 
 def calculateFitness(population):
-    for subPopulation in population:
-        for deck in subPopulation:
-            deck.set_fitness(getFitness(deck, population))
+    for deck in population:
+        deck.set_fitness(getFitness(deck, population))
 
 
 def tournamentSelection(inp, tournamentSize):  # returns 2 individuals via tournament selection (cannot be same)
@@ -217,7 +216,7 @@ def crossoverPopulation(population):
     # cull the population back down to original population size
     cullPop = random.sample(tempPop[1:], len(tempPop) - populationSize)
     for i in range(len(cullPop)):
-        tempPop = removeDeck(subPopulation, cullPop[i])
+        tempPop = removeDeck(tempPop, cullPop[i])
         # subPopulation.remove(i)
 
     return tempPop
@@ -272,6 +271,9 @@ def hearthstone_GA():
     pop_size = 10
     population = init(pop_size, "Mage")
 
+    generation = 0
+    print("Generation: " + str(generation))
+
     calculateFitness(population)  # give each member of the population a fitness
     print(str(population[0]))
     # population = initialization(pop_size)
@@ -279,11 +281,10 @@ def hearthstone_GA():
     # best_model = None
     # fitness_evals = 0
 
-    generation = 0
     fitnesses = []
     # each iteration of this loop is a generation
     while generation < 10:
-        print(generation)
+        print("Generation: " + str(generation))
         # save(population, generation)
         generation += 1
         # fitness_evals += 100#each generation performs 100 fitness evaluations
@@ -300,6 +301,7 @@ def hearthstone_GA():
     bestIndividual = population[0]
     pytohs(bestIndividual.get_class(), bestIndividual.get_class(),
            bestIndividual.get_deck())
+
 
 
     print(str(bestIndividual.get_class()) + "'s best individual has a fitness of: " + str(bestIndividual.get_fitness()))
